@@ -62,11 +62,18 @@ def main():
             if ("message_type" in repJson):
                 if repJson['user_id'] == sufferer:
                     if repJson['message'][0:1] == "[CQ:record,file=":
-                       voiceJ = cq_decode.decode(repJson['message'])
-                       if os.path.exists(voice_path + "/" + datetime.date.today()):
-                        os.mkdir(voice_path + "/" + datetime.date.today() + 'slk')
-                        id = len(os.listdir(voice_path + "/" + datetime.date.today() + 'slk','r')) + 1
-                        os.system("cp {} {}/{}".format(voiceJ['file'], voice_path + "/slk" + datetime.date.today(), voice_nformat(voice_name,id)))
+                        voiceJ = cq_decode.decode(repJson['message'])
+                        if os.path.exists(voice_path + "/" + datetime.date.today()):
+                            os.mkdir(voice_path + "/" + datetime.date.today() + 'slk')
+                            os.mkdir(voice_path + "/" + datetime.date.today() + 'wav')
+                            os.mkdir(voice_path + "/" + datetime.date.today() + 'mp3')
+                            os.mkdir(voice_path + "/" + datetime.date.today() + 'ogg')
+                    id = len(os.listdir(voice_path + "/" + datetime.date.today() + 'slk','r')) + 1
+                    os.system("cp {} {}/{}".format(voiceJ['file'], voice_path + "/slk" + datetime.date.today(), voice_nformat(voice_name,id)))
+                    os.system("sh silk-v3-decoder.sh {} {} {}".format(voice_path + "/" + datetime.date.today() + "/slk/" + voice_nformat(voice_name,id), voice_path + "/" + datetime.date.today() + "/wav/" + voice_nformat(voice_name,id) + ".wav", 'wav'))
+                    os.system("sh silk-v3-decoder.sh {} {} {}".format(voice_path + "/" + datetime.date.today() + "/slk/" + voice_nformat(voice_name,id), voice_path + "/" + datetime.date.today() + "/mp3/" + voice_nformat(voice_name,id) + ".mp3", 'mp3'))
+                    os.system("sh silk-v3-decoder.sh {} {} {}".format(voice_path + "/" + datetime.date.today() + "/slk/" + voice_nformat(voice_name,id), voice_path + "/" + datetime.date.today() + "/ogg/" + voice_nformat(voice_name,id) + ".ogg", 'ogg'))
+                    print("{}({}) has been saved.".format(voice_nformat(voice_name,id), voiceJ['file']))
         except KeyboardInterrupt:
             print("Program terminated.")
             exit()
