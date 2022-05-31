@@ -1,4 +1,3 @@
-from cgi import print_arguments
 import json
 
 #将CQ码转换为JSON
