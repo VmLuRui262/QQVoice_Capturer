@@ -69,7 +69,7 @@ def main():
                             os.mkdir(voice_path + "/" + datetime.date.today() + 'mp3')
                             os.mkdir(voice_path + "/" + datetime.date.today() + 'ogg')
                     id = len(os.listdir(voice_path + "/" + datetime.date.today() + 'slk','r')) + 1
-                    os.system("cp {} {}/{}".format(voiceJ['file'], voice_path + "/slk" + datetime.date.today(), voice_nformat(voice_name,id)))
+                    os.system("cp {} {}/{}".format(gocq_path + "/data/voice/" + voiceJ['file'], voice_path + "/slk" + datetime.date.today(), voice_nformat(voice_name,id)))
                     os.system("sh silk-v3-decoder.sh {} {} {}".format(voice_path + "/" + datetime.date.today() + "/slk/" + voice_nformat(voice_name,id), voice_path + "/" + datetime.date.today() + "/wav/" + voice_nformat(voice_name,id) + ".wav", 'wav'))
                     os.system("sh silk-v3-decoder.sh {} {} {}".format(voice_path + "/" + datetime.date.today() + "/slk/" + voice_nformat(voice_name,id), voice_path + "/" + datetime.date.today() + "/mp3/" + voice_nformat(voice_name,id) + ".mp3", 'mp3'))
                     os.system("sh silk-v3-decoder.sh {} {} {}".format(voice_path + "/" + datetime.date.today() + "/slk/" + voice_nformat(voice_name,id), voice_path + "/" + datetime.date.today() + "/ogg/" + voice_nformat(voice_name,id) + ".ogg", 'ogg'))
