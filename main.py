@@ -31,7 +31,7 @@ def main():
     port = config_y['listen'][1]['port']
     access_token = config_y['listen'][2]['access_token']
     sufferer = config_y['listen'][3]['sufferer']
-    gocq_path = config_y['listen'][4]['path']
+    gocq_path = config_y['listen'][4]['gocq_path']
     if os.path.exists(gocq_path) == False:
         print("Go-CQhttp Path not found!")
         print("Please edit config.yml and run again.")
@@ -40,10 +40,10 @@ def main():
         print("Go-CQhttp not found!")
         print("Please edit config.yml and run again.")
         exit()
-    voice_path = config_y['listen'][5]['path']
+    voice_path = config_y['listen'][5]['voice_path']
     if os.path.exists(voice_path) == False:
         os.mkdir(voice_path)
-    voice_name = config_y['listen'][6]['voice_name']
+    voice_name = config_y['listen'][6]['voice_Name']
     url = "ws://{}:{}".format(host, port)
     if access_token is not None:
         url += "?access_token={}".format(access_token)
@@ -61,19 +61,24 @@ def main():
             repJson = json.loads(ws.recv())
             if ("message_type" in repJson):
                 if repJson['user_id'] == sufferer:
-                    if repJson['message'][0:1] == "[CQ:record,file=":
+                    if repJson['message'][0:16] == "[CQ:record,file=":
                         voiceJ = cq_decode.decode(repJson['message'])
-                        if os.path.exists(voice_path + "/" + datetime.date.today()):
-                            os.mkdir(voice_path + "/" + datetime.date.today() + 'slk')
-                            os.mkdir(voice_path + "/" + datetime.date.today() + 'wav')
-                            os.mkdir(voice_path + "/" + datetime.date.today() + 'mp3')
-                            os.mkdir(voice_path + "/" + datetime.date.today() + 'ogg')
-                    id = len(os.listdir(voice_path + "/" + datetime.date.today() + 'slk','r')) + 1
-                    os.system("cp {} {}/{}".format(gocq_path + "/data/voice/" + voiceJ['file'], voice_path + "/slk" + datetime.date.today(), voice_nformat(voice_name,id)))
-                    os.system("sh silk-v3-decoder.sh {} {} {}".format(voice_path + "/" + datetime.date.today() + "/slk/" + voice_nformat(voice_name,id), voice_path + "/" + datetime.date.today() + "/wav/" + voice_nformat(voice_name,id) + ".wav", 'wav'))
-                    os.system("sh silk-v3-decoder.sh {} {} {}".format(voice_path + "/" + datetime.date.today() + "/slk/" + voice_nformat(voice_name,id), voice_path + "/" + datetime.date.today() + "/mp3/" + voice_nformat(voice_name,id) + ".mp3", 'mp3'))
-                    os.system("sh silk-v3-decoder.sh {} {} {}".format(voice_path + "/" + datetime.date.today() + "/slk/" + voice_nformat(voice_name,id), voice_path + "/" + datetime.date.today() + "/ogg/" + voice_nformat(voice_name,id) + ".ogg", 'ogg'))
-                    print("{}({}) has been saved.".format(voice_nformat(voice_name,id), voiceJ['file']))
+                        today = str(datetime.date.today())
+                        if os.path.exists(voice_path + "/" + today) == False:
+                            os.mkdir(voice_path + "/" + today)
+                            os.mkdir(voice_path + "/" + today + '/slk')
+                            os.mkdir(voice_path + "/" + today + '/wav')
+                            os.mkdir(voice_path + "/" + today + '/mp3')
+                            os.mkdir(voice_path + "/" + today + '/ogg')
+                        id = str(len(os.listdir(voice_path + "/" + today + '/slk')) + 1).zfill(3)
+                        os.system("cp {} {}/{}".format(gocq_path + "/data/voices/" +voiceJ['file'], voice_path + '/' + today +"/slk/", voice_nformat(voice_name,id)))
+                        os.system("sh {}/silk-v3-decoder/converter.sh {} {}".format(os.getcwd(),voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id), "wav"))
+                        os.system("mv {} {}".format(voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id) + ".wav", voice_path + "/" + today + "wav"))
+                        os.system("sh {}/silk-v3-decoder/converter.sh {} {}".format(os.getcwd(),voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id), "mp3"))
+                        os.system("mv {} {}".format(voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id) + ".mp3", voice_path + "/" + today + "mp3"))
+                        os.system("sh {}/silk-v3-decoder/converter.sh {} {}".format(os.getcwd(),voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id), "ogg"))
+                        os.system("mv {} {}".format(voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id) + ".ogg", voice_path + "/" + today + "ogg"))
+                        print("{}({}) has been saved.".format(voice_nformat(voice_name,id), voiceJ['file']))
         except KeyboardInterrupt:
             print("Program terminated.")
             exit()
