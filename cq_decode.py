@@ -14,4 +14,4 @@ def decode(cq_str):
 if __name__ == "__main__": #测试
     print("使用方法: cq_decode.decode(cq_str)")
     print("例如: cq_decode.decode('[CQ:record,file=17670CF0648AC14455D8B8101F4C6003.amr]')")
-    print("输出:" + str(decode('[CQ:record,file=17670CF0648AC14455D8B8101F4C6003.amr]')))
+    print("输出:" + decode('[CQ:record,file=17670CF0648AC14455D8B8101F4C6003.amr]'))
