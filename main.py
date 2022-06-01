@@ -1,14 +1,10 @@
-import websocket
-import yaml
-import json
-import platform
-import cq_decode
-import os
-import datetime
-#{"anonymous":null,"font":0,"group_id":365697768,"message":"[CQ:record,file=17670CF0648AC14455D8B8101F4C6003.amr,url=http://grouptalk.c2c.qq.com/?ver=0\u0026amp;rkey=3062020101045b30590201010201010204073dd4dd042439386a4f467248346563696730444f35444e305941466f4d346c355355324e3763315330020462956dbb041f0000000866696c6574797065000000013100000005636f64656300000001310400\u0026amp;filetype=1\u0026amp;voice_codec=1]","message_id":-217799010,"message_seq":7153,"message_type":"group","post_type":"message","raw_message":"[CQ:record,file=17670CF0648AC14455D8B8101F4C6003.amr]","self_id":121492701,"sender":{"age":0,"area":"","card":"","level":"","nickname":"Vm#262","role":"admin","sex":"unknown","title":"","user_id":591511593},"sub_type":"normal","time":1653960123,"user_id":591511593}
+import websocket,yaml,json,platform,cq_decode,os,datetime
+
 def main():
     print("Your System Type is: {}".format(platform.system()))
-    if platform.system() == "Windows":
+    if platform.system() == "Windows":#检测系统 若为WIndows自动退出
+        #Windows下不支持将slk转换为除mp3之外的其他格式
+        #我懒得弄 直接不允许运行！~
         print("Windows is not supported!")
         exit()
     try:#try to import the config file
@@ -25,8 +21,10 @@ def main():
     - voice_path: /path/to/file
     - voice_Name: vm^id^""")
         print("No config.yml file found.") 
-        print("Please edit config.yml and run again.")
-        exit()
+        print("Please edit config.yml and run again.")#创建配置文件
+        os.system("vim config.yml")
+        exit()#没有配置文件就退出
+    #开导(指导入配置文件)
     host = config_y['listen'][0]['host']
     port = config_y['listen'][1]['port']
     access_token = config_y['listen'][2]['access_token']
@@ -36,55 +34,63 @@ def main():
         print("Go-CQhttp Path not found!")
         print("Please edit config.yml and run again.")
         exit()
-    elif os.path.exists(gocq_path + "/go-cqhttp") == False:
-        print("Go-CQhttp not found!")
+    elif os.path.exists(gocq_path + "/data/voices") == False:
+        print("Voices folder not found!")#检测音频文件夹是否存在
         print("Please edit config.yml and run again.")
         exit()
     voice_path = config_y['listen'][5]['voice_path']
-    if os.path.exists(voice_path) == False:
-        os.mkdir(voice_path)
+    if os.path.exists(voice_path) == False:#检测音频保存文件夹是否存在
+        os.mkdir(voice_path)#不存在就创建
     voice_name = config_y['listen'][6]['voice_Name']
     url = "ws://{}:{}".format(host, port)
-    if access_token is not None:
-        url += "?access_token={}".format(access_token)
+    if access_token is not None:#检测access_token是否为空
+        url += "?access_token={}".format(access_token)#不为空就加上
     try:
-        ws = websocket.create_connection(url)
-    except ConnectionRefusedError:
+        ws = websocket.create_connection(url)#连接
+    except ConnectionRefusedError:#连接失败
         print("Error: Connection failed.\nPlease check the config file.\nws://{}:{}?access_token={}\nExiting...".format(host,port,access_token))
+        exit()
+    except websocket._exceptions.WebSocketBadStatusException: #连接失败,这种情况一般都是401,说明access_token错误
+        print("Error: Token verification failed.\nPlease check the config file.\nws://{}:{}?access_token={}\nExiting...".format(host,port,access_token))
+        exit()
     print("Connected to websocket.Use Ctrl+C to exit.")
     def voice_nformat(voice_name,id):
-        output = voice_name.replace('^id^', '{}').format(id)
+        output = voice_name.replace('^id^', id).replace('^date^', datetime.datetime.now().strftime("%Y-%m-%d")).replace('^time^', datetime.datetime.now().strftime("%H:%M:%S"))
+        #其他我用不上 自己弄啦！！
         return output
 
-    while True:
+    while True:#循环
         try:
-            repJson = json.loads(ws.recv())
-            if ("message_type" in repJson):
-                if repJson['user_id'] == sufferer:
-                    if repJson['message'][0:16] == "[CQ:record,file=":
-                        voiceJ = cq_decode.decode(repJson['message'])
-                        today = str(datetime.date.today())
-                        if os.path.exists(voice_path + "/" + today) == False:
-                            os.mkdir(voice_path + "/" + today)
-                            os.mkdir(voice_path + "/" + today + '/slk')
-                            os.mkdir(voice_path + "/" + today + '/wav')
-                            os.mkdir(voice_path + "/" + today + '/mp3')
-                            os.mkdir(voice_path + "/" + today + '/ogg')
-                        id = str(len(os.listdir(voice_path + "/" + today + '/slk')) + 1).zfill(3)
-                        os.system("cp {} {}/{}".format(gocq_path + "/data/voices/" +voiceJ['file'], voice_path + '/' + today +"/slk/", voice_nformat(voice_name,id)))
-                        os.system("sh {}/silk-v3-decoder/converter.sh {} {}".format(os.getcwd(),voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id), "wav"))
-                        os.system("mv {} {}".format(voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id) + ".wav", voice_path + "/" + today + "wav"))
-                        os.system("sh {}/silk-v3-decoder/converter.sh {} {}".format(os.getcwd(),voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id), "mp3"))
+            repJson = json.loads(ws.recv())#接收，解析
+            if ("message_type" in repJson):#检测是否为消息
+                if repJson['user_id'] == sufferer:#检测是否为受害者
+                    if repJson['message'][0:16] == "[CQ:record,file=":#检测是否为语音
+                        voiceJ = cq_decode.decode(repJson['message'])#解析语音
+                        today = str(datetime.date.today())#获取今天日期
+                        if os.path.exists(voice_path + "/" + today) == False:#检测今天日期文件夹是否存在
+                            os.mkdir(voice_path + "/" + today)#不存在就创建
+                            os.mkdir(voice_path + "/" + today + '/slk')#创建slk文件夹
+                            os.mkdir(voice_path + "/" + today + '/wav')#创建wav文件夹
+                            os.mkdir(voice_path + "/" + today + '/mp3')#创建mp3文件夹
+                            os.mkdir(voice_path + "/" + today + '/ogg')#创建ogg文件夹
+                        id = str(len(os.listdir(voice_path + "/" + today + '/slk')) + 1).zfill(3)#获取id，并补齐3位
+                        os.system("cp {} {}/{}".format(gocq_path + "/data/voices/" +voiceJ['file'], voice_path + '/' + today +"/slk/", voice_nformat(voice_name,id)))#复制语音文件到slk文件夹
+                        os.system("sh {}/silk-v3-decoder/converter.sh {} {}".format(os.getcwd(),voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id), "wav"))#转换语音为wav
+                        os.system("mv {} {}".format(voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id) + ".wav", voice_path + "/" + today + "wav"))#移动wav文件
+                        os.system("sh {}/silk-v3-decoder/converter.sh {} {}".format(os.getcwd(),voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id), "mp3"))#以下同上
                         os.system("mv {} {}".format(voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id) + ".mp3", voice_path + "/" + today + "mp3"))
                         os.system("sh {}/silk-v3-decoder/converter.sh {} {}".format(os.getcwd(),voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id), "ogg"))
                         os.system("mv {} {}".format(voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id) + ".ogg", voice_path + "/" + today + "ogg"))
-                        print("{}({}) has been saved.".format(voice_nformat(voice_name,id), voiceJ['file']))
-        except KeyboardInterrupt:
-            print("Program terminated.")
-            exit()
+                        print("{}({}) has been saved.".format(voice_nformat(voice_name,id), voiceJ['file']))#打印信息
+        except KeyboardInterrupt:#捕获Ctrl+C
+            print("Program terminated.")#结束
+            exit()#退出
 #        except:
 #            print("Error: Unknown error.")
 #            exit()
 
-if __name__ == "__main__":
+if __name__ == "__main__":#主函数
     main()
+else:
+    print("Error: This file is not supposed to be imported.")
+    exit()
