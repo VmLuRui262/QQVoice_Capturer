@@ -1,8 +1,0 @@
-listen:
-    - host: localhost
-    - port: 6700
-    - access_token: ''
-    - sufferer: 591511593
-    - gocq_path: /
-    - voice_path: /path/to/file
-    - voice_Name: vm^id^
