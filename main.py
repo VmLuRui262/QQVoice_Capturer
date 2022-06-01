@@ -76,11 +76,11 @@ def main():
                         id = str(len(os.listdir(voice_path + "/" + today + '/slk')) + 1).zfill(3)#获取id，并补齐3位
                         os.system("cp {} {}/{}".format(gocq_path + "/data/voices/" +voiceJ['file'], voice_path + '/' + today +"/slk/", voice_nformat(voice_name,id)))#复制语音文件到slk文件夹
                         os.system("sh {}/silk-v3-decoder/converter.sh {} {}".format(os.getcwd(),voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id), "wav"))#转换语音为wav
-                        os.system("mv {} {}".format(voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id) + ".wav", voice_path + "/" + today + "wav"))#移动wav文件
                         os.system("sh {}/silk-v3-decoder/converter.sh {} {}".format(os.getcwd(),voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id), "mp3"))#以下同上
-                        os.system("mv {} {}".format(voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id) + ".mp3", voice_path + "/" + today + "mp3"))
                         os.system("sh {}/silk-v3-decoder/converter.sh {} {}".format(os.getcwd(),voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id), "ogg"))
-                        os.system("mv {} {}".format(voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id) + ".ogg", voice_path + "/" + today + "ogg"))
+                        os.system("mv {} {}".format(voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id) + ".wav", voice_path + "/" + today + "/wav"))
+                        os.system("mv {} {}".format(voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id) + ".mp3", voice_path + "/" + today + "/mp3"))
+                        os.system("mv {} {}".format(voice_path + "/" + today + "/slk/" + voice_nformat(voice_name,id) + ".ogg", voice_path + "/" + today + "/ogg"))
                         print("{}({}) has been saved.".format(voice_nformat(voice_name,id), voiceJ['file']))#打印信息
         except KeyboardInterrupt:#捕获Ctrl+C
             print("Program terminated.")#结束

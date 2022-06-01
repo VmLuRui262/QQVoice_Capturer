@@ -14,10 +14,10 @@
 # 依赖
 - [websocket-client](https://pypi.org/project/websocket-client/)
 - [pyyaml](https://pypi.org/project/PyYAML/)
-- [json](https://pypi.org/project/json/)
-- [platform](https://pypi.org/project/platform/)
-- [os](https://pypi.org/project/os/)
 - [datetime](https://pypi.org/project/datetime/)
+<!-- - [platform](https://pypi.org/project/platform/)-->
+<!-- - [os](https://pypi.org/project/os/) -->
+<!-- - [json](https://pypi.org/project/json/) -->
 # 如何使用
 - 将本仓库git clone下来 `git clone https://github.com/VmLuRui262/QQVoice_Capturer.git`
 - 第一次运行以生成配置文件 `python3 main.py`
@@ -28,7 +28,7 @@
 - `voice_Name`输入你的语音名称及格式
 - 运行main.py `python3 main.py`
 # `voice_Name` 格式及支持的变量
-! : 格式化函数在`main.py`的57行 `def voice_nformat(voice_name,id):`
+! : 格式化函数在 `main.py` 的57行 `def voice_nformat(voice_name,id):`
 
 支持的变量:
 - `^date^` - 发送语音的日期 如(2022-06-01)
